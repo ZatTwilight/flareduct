@@ -1,0 +1,13 @@
+# Go
+/bin/
+/dist/
+*.test
+coverage.out
+
+# Local runtime state
+.flareduct/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
