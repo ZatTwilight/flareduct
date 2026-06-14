@@ -2,7 +2,7 @@
 set -e
 
 REPO="ZatTwilight/flareduct"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 BINARY="flareduct"
 
 # Detect OS and architecture.
@@ -36,7 +36,7 @@ if [ "$VERSION" = "latest" ]; then
   VERSION="${TAG}"
 fi
 
-ARCHIVE="${BINARY}_${VERSION}_${OS}_${ARCH}.tar.gz"
+ARCHIVE="${BINARY}_${VERSION#v}_${OS}_${ARCH}.tar.gz"
 URL="https://github.com/${REPO}/releases/download/${VERSION}/${ARCHIVE}"
 
 TMP_DIR=$(mktemp -d)
