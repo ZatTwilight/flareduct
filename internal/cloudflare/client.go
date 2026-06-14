@@ -101,6 +101,13 @@ func (c *Client) DeleteDNSRecord(ctx context.Context, zoneID, recordID string) e
 	return c.do(ctx, http.MethodDelete, path, nil, &response)
 }
 
+func (c *Client) AddPagesDomain(ctx context.Context, accountID, projectName, hostname string) error {
+	var response Response[map[string]any]
+	path := "/client/v4/accounts/" + url.PathEscape(accountID) + "/pages/projects/" + url.PathEscape(projectName) + "/domains"
+	body := map[string]string{"name": hostname}
+	return c.do(ctx, http.MethodPost, path, body, &response)
+}
+
 func (c *Client) do(ctx context.Context, method, path string, body any, out any) error {
 	var reader io.Reader
 	if body != nil {

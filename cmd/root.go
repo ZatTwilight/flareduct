@@ -33,7 +33,7 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	case "up", "run":
 		runErr = runUp(cmdArgs, globals, stdout, stderr)
 	case "ship", "deploy":
-		runErr = runShip(cmdArgs, stdout, stderr)
+		runErr = runShip(cmdArgs, globals, stdout, stderr)
 	case "list", "ls", "ps":
 		runErr = runList(cmdArgs, stdout)
 	case "down", "stop":

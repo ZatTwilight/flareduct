@@ -85,6 +85,11 @@ Flags:
       --project NAME       Pages project name (default <random-words>)
       --project-name NAME  Pages project name
       --branch NAME        Pages branch name (default main)
+      --hostname HOST      attach an exact custom Pages hostname
+      --subdomain NAME     attach NAME under pages.domain or public.domain
+      --domain DOMAIN      domain override for generated/--subdomain hostnames
+      --pages-dev          skip custom domain attachment
+      --account-id ID      Cloudflare account id override
       --wrangler PATH      wrangler binary override
       --verbose            print the underlying wrangler command
 

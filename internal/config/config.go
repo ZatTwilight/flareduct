@@ -13,6 +13,7 @@ type Config struct {
 	Cloudflared string                   `yaml:"cloudflared" json:"cloudflared"`
 	Defaults    Defaults                 `yaml:"defaults,omitempty" json:"defaults,omitempty"`
 	Public      PublicConfig             `yaml:"public,omitempty" json:"public,omitempty"`
+	Pages       PagesConfig              `yaml:"pages,omitempty" json:"pages,omitempty"`
 	Services    map[string]ServiceConfig `yaml:"services,omitempty" json:"services,omitempty"`
 }
 
@@ -36,6 +37,11 @@ type PublicConfig struct {
 
 	Keep         bool `yaml:"keep,omitempty" json:"keep,omitempty"`
 	OverwriteDNS bool `yaml:"overwrite_dns,omitempty" json:"overwrite_dns,omitempty"`
+}
+
+type PagesConfig struct {
+	AccountID string `yaml:"account_id,omitempty" json:"account_id,omitempty"`
+	Domain    string `yaml:"domain,omitempty" json:"domain,omitempty"`
 }
 
 type ServiceConfig struct {

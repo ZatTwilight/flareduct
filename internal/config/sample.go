@@ -25,6 +25,11 @@ defaults:
 #   keep: false
 #   overwrite_dns: false
 
+# Optional Cloudflare Pages settings for flareduct ship.
+# pages:
+#   account_id: 99ed1e4f3a7c251328fddfe5661a6195 # optional; auto-detected from wrangler
+#   domain: pages.example.com # optional; falls back to public.domain
+
 services:
   # Quick tunnel alias. flareduct up web runs:
   # cloudflared tunnel --url http://localhost:3000
