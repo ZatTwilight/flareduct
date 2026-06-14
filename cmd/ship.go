@@ -43,6 +43,9 @@ func runShip(args []string, globals cli.GlobalOptions, stdout, stderr io.Writer)
 		printShipHelp(stdout)
 		return nil
 	}
+	if target == "cleanup" || target == "clean" || target == "rm" || target == "remove" {
+		return runShipCleanup(args[1:], globals, stdout, stderr)
+	}
 	if target == "" {
 		printShipHelp(stderr)
 		return fmt.Errorf("missing path")
@@ -266,6 +269,99 @@ func attachPagesDomain(hostname, project, accountOverride string, cfg config.Con
 
 	if err := client.AddPagesDomain(ctx, accountID, project, hostname); err != nil && !strings.Contains(strings.ToLower(err.Error()), "already") {
 		return err
+	}
+	return nil
+}
+
+func runShipCleanup(args []string, globals cli.GlobalOptions, stdout, stderr io.Writer) error {
+	opts, project, err := parseShipArgs(args)
+	if err != nil {
+		return err
+	}
+	if opts.Help {
+		printShipCleanupHelp(stdout)
+		return nil
+	}
+	if project == "" {
+		project = opts.Project
+	}
+	if project == "" {
+		return fmt.Errorf("missing Pages project name")
+	}
+	project = names.SanitizeName(project)
+	if project == "" {
+		return fmt.Errorf("invalid project name")
+	}
+	cfg, _, _, err := config.LoadConfig(globals.ConfigPath)
+	if err != nil {
+		return err
+	}
+	if opts.Wrangler == "" {
+		opts.Wrangler = "wrangler"
+	}
+	wranglerPath, err := resolveToolPath(opts.Wrangler, "wrangler")
+	if err != nil {
+		return err
+	}
+	wranglerWorkDir, err := os.MkdirTemp("", "flareduct-wrangler-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(wranglerWorkDir)
+
+	if hostname, ok, err := resolveShipHostname(opts, cfg, project); err != nil {
+		return err
+	} else if ok {
+		if err := cleanupShipDNS(hostname, project, cfg, stdout); err != nil {
+			return err
+		}
+	}
+
+	fmt.Fprintf(stdout, "flareduct: deleting Cloudflare Pages project %s\n", project)
+	if _, err := runWrangler(wranglerPath, wranglerWorkDir, []string{"pages", "project", "delete", project, "--yes"}, stdout, stderr, opts.Verbose); err != nil {
+		return fmt.Errorf("wrangler pages project delete failed: %w", err)
+	}
+	fmt.Fprintf(stdout, "flareduct: cleaned up ship project %s\n", project)
+	return nil
+}
+
+func cleanupShipDNS(hostname, project string, cfg config.Config, stdout io.Writer) error {
+	apiToken, source, ok, err := token.LoadCloudflareAPIToken()
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("no Cloudflare API token configured; run `flareduct token set` to remove DNS for %s", hostname)
+	}
+	fmt.Fprintf(stdout, "flareduct: cleaning DNS %s using token from %s\n", hostname, source)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	client := cloudflare.NewClient(apiToken, nil)
+	zoneID := strings.TrimSpace(cfg.Public.ZoneID)
+	if zoneID == "" {
+		zoneID, err = client.FindZoneID(ctx, hostname, cfg.Public.Zone)
+		if err != nil {
+			return err
+		}
+	}
+	records, err := client.FindDNSRecords(ctx, zoneID, hostname)
+	if err != nil {
+		return err
+	}
+	target := project + ".pages.dev"
+	deleted := 0
+	for _, record := range records {
+		if strings.EqualFold(strings.TrimSuffix(record.Content, "."), target) {
+			if err := client.DeleteDNSRecord(ctx, zoneID, record.ID); err != nil {
+				return err
+			}
+			deleted++
+		}
+	}
+	if deleted == 0 {
+		fmt.Fprintf(stdout, "flareduct: no matching DNS record found for %s -> %s\n", hostname, target)
+	} else {
+		fmt.Fprintf(stdout, "flareduct: deleted %d DNS record(s) for %s\n", deleted, hostname)
 	}
 	return nil
 }

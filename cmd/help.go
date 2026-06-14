@@ -20,6 +20,7 @@ func printHelp(w io.Writer) {
 Usage:
   flareduct up <port|url|host:port|path|alias|tunnel> [--detach] [--name NAME]
   flareduct ship <path> [--name NAME]
+  flareduct ship cleanup <name>
   flareduct list
   flareduct down <name|pid>
   flareduct logs <name|pid> [-f]
@@ -36,6 +37,7 @@ Examples:
   flareduct up coolfile.html                # serve one HTML file
   flareduct ship .                          # publish static files to Cloudflare Pages
   flareduct ship coolfile.html --name demo  # publish one file as a Pages site
+  flareduct ship cleanup demo               # remove DNS, then delete Pages project
   flareduct login                           # cloudflared tunnel login helper
   flareduct token set                       # save API token for DNS cleanup
   flareduct up api --detach                 # alias from config, runs in background
@@ -97,6 +99,25 @@ Examples:
   flareduct ship .
   flareduct ship ./dist --name demo
   flareduct ship coolfile.html
+  flareduct ship cleanup demo
+
+`)
+}
+
+func printShipCleanupHelp(w io.Writer) {
+	fmt.Fprint(w, `Usage:
+  flareduct ship cleanup <project> [flags]
+
+Removes the matching custom-domain DNS CNAME first, then deletes the
+Cloudflare Pages project via Wrangler.
+
+Flags:
+      --hostname HOST      exact custom Pages hostname to clean up
+      --subdomain NAME     NAME under pages.domain or public.domain (default project)
+      --domain DOMAIN      domain override for generated/--subdomain hostnames
+      --pages-dev          skip DNS cleanup and only delete the Pages project
+      --wrangler PATH      wrangler binary override
+      --verbose            print the underlying wrangler command
 
 `)
 }
