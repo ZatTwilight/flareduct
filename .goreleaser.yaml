@@ -1,0 +1,67 @@
+version: 2
+
+project_name: flareduct
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: flareduct
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    binary: flareduct
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+
+archives:
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "arm64" }}arm64
+      {{- else }}{{ .Arch }}{{ end }}
+    files:
+      - README.md
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+
+release:
+  draft: false
+  prerelease: auto
+
+brews:
+  - name: flareduct
+    repository:
+      owner: ZatTwilight
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/ZatTwilight/flareduct"
+    description: "CLI wrapper around cloudflared for Cloudflare Tunnel workflows"
+    test: |
+      system "#{bin}/flareduct", "version"
+    install: |
+      bin.install "flareduct"
+    skip_upload: false

@@ -7,7 +7,34 @@
 - quick static file servers: `flareduct up .` or `flareduct up coolfile.html`
 - existing named/static Cloudflare Tunnels: `flareduct up blog`
 
-## Install / build
+## Install
+
+### macOS and Linux (Homebrew)
+
+```sh
+brew tap ZatTwilight/tap
+brew install flareduct
+```
+
+### Install script
+
+```sh
+curl -sSL https://raw.githubusercontent.com/ZatTwilight/flareduct/main/install.sh | sh
+```
+
+Install to `~/.local/bin` instead of `/usr/local/bin`:
+
+```sh
+curl -sSL https://raw.githubusercontent.com/ZatTwilight/flareduct/main/install.sh | INSTALL_DIR="$HOME/.local/bin" sh
+```
+
+Pin to a specific release:
+
+```sh
+curl -sSL https://raw.githubusercontent.com/ZatTwilight/flareduct/main/install.sh | VERSION=v0.1.0 sh
+```
+
+### Build from source
 
 ```sh
 go build -o bin/flareduct .
