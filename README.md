@@ -97,6 +97,25 @@ wrangler login
 
 By default, `ship` creates a random Pages project name like `cozy-otter` and publishes to the standard `*.pages.dev` endpoint. Use `--name` / `--project` to choose the project name.
 
+If `pages.domain` or `public.domain` is configured and a Cloudflare API token is available, `ship` also attaches a matching custom domain:
+
+```yaml
+pages:
+  # account_id is optional; flareduct auto-detects it with `wrangler whoami --json`.
+  account_id: 99ed1e4f3a7c251328fddfe5661a6195
+  domain: pages.example.com
+```
+
+```sh
+flareduct token set
+flareduct ship .              # https://cozy-otter.pages.example.com/ + pages.dev fallback
+flareduct ship . --subdomain demo
+flareduct ship . --hostname demo.example.com
+flareduct ship . --pages-dev  # skip custom domain attachment
+```
+
+The token needs permissions for Pages custom domains plus DNS management, typically Account/Pages edit, Account read, Zone read, and DNS edit. `ship` creates/updates the CNAME for the custom hostname to point at `<project>.pages.dev` before attaching the Pages domain.
+
 ## Owned-domain quick tunnels
 
 Run `flareduct login` once (a small wrapper around `cloudflared tunnel login`), then configure a domain you control:

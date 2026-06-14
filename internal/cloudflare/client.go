@@ -34,9 +34,11 @@ type Zone struct {
 }
 
 type DNSRecord struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Type    string `json:"type"`
+	Content string `json:"content"`
+	Proxied bool   `json:"proxied"`
 }
 
 type Response[T any] struct {
@@ -99,6 +101,35 @@ func (c *Client) DeleteDNSRecord(ctx context.Context, zoneID, recordID string) e
 	var response Response[map[string]any]
 	path := "/client/v4/zones/" + url.PathEscape(zoneID) + "/dns_records/" + url.PathEscape(recordID)
 	return c.do(ctx, http.MethodDelete, path, nil, &response)
+}
+
+func (c *Client) UpsertCNAME(ctx context.Context, zoneID, name, content string, proxied bool) error {
+	records, err := c.FindDNSRecords(ctx, zoneID, name)
+	if err != nil {
+		return err
+	}
+	body := map[string]any{
+		"type":    "CNAME",
+		"name":    name,
+		"content": content,
+		"proxied": proxied,
+	}
+	if len(records) == 0 {
+		var response Response[DNSRecord]
+		path := "/client/v4/zones/" + url.PathEscape(zoneID) + "/dns_records"
+		return c.do(ctx, http.MethodPost, path, body, &response)
+	}
+	for _, record := range records {
+		if strings.EqualFold(record.Content, content) && record.Proxied == proxied {
+			continue
+		}
+		var response Response[DNSRecord]
+		path := "/client/v4/zones/" + url.PathEscape(zoneID) + "/dns_records/" + url.PathEscape(record.ID)
+		if err := c.do(ctx, http.MethodPatch, path, body, &response); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *Client) AddPagesDomain(ctx context.Context, accountID, projectName, hostname string) error {

@@ -250,6 +250,20 @@ func attachPagesDomain(hostname, project, accountOverride string, cfg config.Con
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	client := cloudflare.NewClient(apiToken, nil)
+
+	zoneID := strings.TrimSpace(cfg.Public.ZoneID)
+	if zoneID == "" {
+		zoneID, err = client.FindZoneID(ctx, hostname, cfg.Public.Zone)
+		if err != nil {
+			return err
+		}
+	}
+	cnameTarget := project + ".pages.dev"
+	fmt.Fprintf(stdout, "flareduct: routing DNS %s -> %s\n", hostname, cnameTarget)
+	if err := client.UpsertCNAME(ctx, zoneID, hostname, cnameTarget, true); err != nil {
+		return err
+	}
+
 	if err := client.AddPagesDomain(ctx, accountID, project, hostname); err != nil && !strings.Contains(strings.ToLower(err.Error()), "already") {
 		return err
 	}
