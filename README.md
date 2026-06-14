@@ -5,6 +5,7 @@
 - quick, throwaway public URLs: `flareduct up 3000`
 - owned-domain quick tunnels: `flareduct up 3000 --subdomain demo`
 - quick static file servers: `flareduct up .` or `flareduct up coolfile.html`
+- static publishes to Cloudflare Pages: `flareduct ship .` or `flareduct ship coolfile.html`
 - existing named/static Cloudflare Tunnels: `flareduct up blog`
 
 ## Install
@@ -75,6 +76,26 @@ flareduct up coolfile.html
 For a file target, `/` serves that file and sibling assets remain available by path, so a small HTML page can reference nearby CSS/images.
 
 Static file targets run in foreground mode for now; `--detach` is rejected because the embedded local file server would otherwise exit immediately.
+
+## Ship static files to Cloudflare Pages
+
+Publish a directory or single HTML file to Cloudflare Pages via [`wrangler`](https://developers.cloudflare.com/workers/wrangler/):
+
+```sh
+flareduct ship .
+flareduct ship ./dist --name demo
+flareduct ship coolfile.html
+```
+
+Directories are uploaded as-is. Single `.html` / `.htm` files are uploaded as `index.html` so the generated Pages URL opens the file directly.
+
+`wrangler` must be installed and authenticated first:
+
+```sh
+wrangler login
+```
+
+By default, `ship` creates a random Pages project name like `cozy-otter` and publishes to the standard `*.pages.dev` endpoint. Use `--name` / `--project` to choose the project name.
 
 ## Owned-domain quick tunnels
 
@@ -226,6 +247,7 @@ so existing named tunnels can be run without adding a `flareduct` alias first.
 
 ```text
 flareduct up <port|url|host:port|path|alias|tunnel> [--detach] [--subdomain NAME|--hostname HOST]
+flareduct ship <file|dir> [--name NAME]
 flareduct list
 flareduct down <name|pid>
 flareduct logs <name|pid> [-f]

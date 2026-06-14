@@ -9,6 +9,12 @@ import (
 
 var version = "dev"
 
+func SetVersion(v string) {
+	if v != "" {
+		version = v
+	}
+}
+
 func Run(args []string, stdout, stderr io.Writer) int {
 	globals, rest, err := cli.ParseLeadingGlobals(args)
 	if err != nil {
@@ -26,6 +32,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	switch cmd {
 	case "up", "run":
 		runErr = runUp(cmdArgs, globals, stdout, stderr)
+	case "ship", "deploy":
+		runErr = runShip(cmdArgs, stdout, stderr)
 	case "list", "ls", "ps":
 		runErr = runList(cmdArgs, stdout)
 	case "down", "stop":

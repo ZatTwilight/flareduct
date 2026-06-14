@@ -19,6 +19,7 @@ func printHelp(w io.Writer) {
 
 Usage:
   flareduct up <port|url|host:port|path|alias|tunnel> [--detach] [--name NAME]
+  flareduct ship <path> [--name NAME]
   flareduct list
   flareduct down <name|pid>
   flareduct logs <name|pid> [-f]
@@ -33,6 +34,8 @@ Examples:
   flareduct up 3000 --hostname demo.dev.tld # exact owned hostname
   flareduct up .                            # serve current directory
   flareduct up coolfile.html                # serve one HTML file
+  flareduct ship .                          # publish static files to Cloudflare Pages
+  flareduct ship coolfile.html --name demo  # publish one file as a Pages site
   flareduct login                           # cloudflared tunnel login helper
   flareduct token set                       # save API token for DNS cleanup
   flareduct up api --detach                 # alias from config, runs in background
@@ -66,6 +69,29 @@ Flags:
       --wait DURATION     wait for a quick tunnel public URL in detached mode (default 20s)
       --config PATH       flareduct config path
       --cloudflared PATH
+
+`)
+}
+
+func printShipHelp(w io.Writer) {
+	fmt.Fprint(w, `Usage:
+  flareduct ship <file|dir> [flags]
+
+Publishes static files to Cloudflare Pages via Wrangler. Directories are
+uploaded as-is. Single .html/.htm files are uploaded as index.html.
+
+Flags:
+      --name NAME          Pages project name (alias for --project)
+      --project NAME       Pages project name (default <random-words>)
+      --project-name NAME  Pages project name
+      --branch NAME        Pages branch name (default main)
+      --wrangler PATH      wrangler binary override
+      --verbose            print the underlying wrangler command
+
+Examples:
+  flareduct ship .
+  flareduct ship ./dist --name demo
+  flareduct ship coolfile.html
 
 `)
 }
