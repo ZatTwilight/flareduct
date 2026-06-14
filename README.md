@@ -20,19 +20,19 @@ brew install flareduct
 ### Install script
 
 ```sh
-curl -sSL https://raw.githubusercontent.com/ZatTwilight/flareduct/main/install.sh | sh
+curl -sSL https://get.flareduct.dev | sh
 ```
 
-Install to `~/.local/bin` instead of `/usr/local/bin`:
+The default install location is `~/.local/bin`. Override it with `INSTALL_DIR`:
 
 ```sh
-curl -sSL https://raw.githubusercontent.com/ZatTwilight/flareduct/main/install.sh | INSTALL_DIR="$HOME/.local/bin" sh
+curl -sSL https://get.flareduct.dev | INSTALL_DIR=/usr/local/bin sh
 ```
 
 Pin to a specific release:
 
 ```sh
-curl -sSL https://raw.githubusercontent.com/ZatTwilight/flareduct/main/install.sh | VERSION=v0.1.0 sh
+curl -sSL https://get.flareduct.dev | VERSION=v0.1.0 sh
 ```
 
 ### Build from source
